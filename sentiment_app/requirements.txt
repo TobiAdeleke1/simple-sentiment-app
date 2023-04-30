@@ -1,0 +1,5 @@
+pytest
+flask
+selenium
+spacy
+spacytextblob
