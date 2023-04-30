@@ -1,103 +1,75 @@
 import unittest
 from blobtext_client import BlobTextClient
-# from test_blobtextmodel import TextBlobSpacy,TextblobTestModel
+from test_blobtextmodel import TextBlobGenericModel
 
 class TestBlobTextClient(unittest.TestCase):
     
-	@unittest.skip("Still need to think on how to test")
-	def test_get_textblob_class_for_empty_text(self):
-		btc = BlobTextClient('eng_model')
-		text_sentiment = btc.get_textblob("","") # empty string 
-		self.assertIsInstance(text_sentiment, list)
-
-	def test_get_sentiment_list_for_empty_text(self):
-		btc = BlobTextClient('eng_model')
+	def test_get_empty_sentiment_dict_for_empty_text(self):
+		modeltestdouble = TextBlobGenericModel('eng_model')
+		modeltestdouble.return_textblob_doc([])
+		btc = BlobTextClient(modeltestdouble)
 		text_sentiment = btc.get_sentiment("") # empty string 
-		self.assertIsInstance(text_sentiment, list)
-		# desired output {"polarity": .. , "subjectivity": ..,  }
+		self.assertIsInstance(text_sentiment, dict)
+		
+	def test_get_empty_sentiment_dict_for_nonempty_text(self):
+		modeltestdouble = TextBlobGenericModel('eng_model')
+		modeltestdouble.return_textblob_doc([])
+		btc = BlobTextClient(modeltestdouble)
+		text_sentiment = btc.get_sentiment("Not interested much in thinks today") # nonempty string 
+		self.assertIsInstance(text_sentiment, dict)
+    
+	def test_get_non_empty_sentiment_for_nonempty_text(self):
+		"""
+		Serialise output of testblob is serialise to expected dict
+		"""
+		modeltestdouble = TextBlobGenericModel('eng_model')
+		sentimentlist = [(['ultimate','finally'], 0.0, 1.0,None),   # example of sentiment anaylsis from textblob
+		                 (['able'], 0.5, 0.625, None),
+						 (['fearful'], -0.9, 1.0,None) ]
+		modeltestdouble.return_textblob_doc(sentimentlist)
+		
+		expected_result = {"sentimentwords": [
+			                                {"words":['ultimate','finally'], "wordpolarity":0.0, "wordsubjectivity":1.0},
+							                {"words":['able'], "wordpolarity":0.5, "wordsubjectivity":0.625},
+				                            {"words":['fearful'], "wordpolarity":-0.9, "wordsubjectivity":1.0}
+											]}
+		btc = BlobTextClient(modeltestdouble)
+		result = btc.get_sentiment('....')
+		self.assertListEqual(result["sentimentwords"],expected_result["sentimentwords"])
 	
-
 	def test_get_subjectivity_float_for_empty_text(self):
-		btc = BlobTextClient('eng_model')
+		modeltestdouble = TextBlobGenericModel('eng_model')
+		modeltestdouble.return_textblob_doc('')
+		btc = BlobTextClient(modeltestdouble)
 		text_subjectivity = btc.get_subjectivity("")
 		self.assertIsInstance(text_subjectivity, float)
+
+	def test_get_subjectivity_float_for_nonempty_text(self):
+		modeltestdouble = TextBlobGenericModel('eng_model')
+		sentimentlist = [(['ultimate','finally'], 0.0, 1.0,None),   # example of sentiment anaylsis from textblob
+		                 (['able'], 0.5, 0.625, None),
+						 (['fearful'], -0.9, 1.0, None)]
+		modeltestdouble.return_textblob_doc(sentimentlist)
+		btc = BlobTextClient(modeltestdouble)
+		text_subjectivity = btc.get_subjectivity("....")
+		# expected = in range[0,1]
+		self.assertTrue(0<=text_subjectivity<=1)
 	
 	def test_get_polarity_float_for_empty_text(self):
-		tbc = BlobTextClient('eng_model')
-		text_polarity = tbc.get_polarity('') # empty string 
+		modeltestdouble = TextBlobGenericModel('eng_model')
+		modeltestdouble.return_textblob_doc('')
+		btc = BlobTextClient(modeltestdouble) #[-1.0, 1.0] 0.35
+		text_polarity = btc.get_polarity('.......')
 		self.assertIsInstance(text_polarity, float)
-    
-	def test_get_ngram_list_for_empty_text(self):
-		tbc = BlobTextClient('eng_model')
-		text_ngram = tbc.get_ngram("")
-		self.assertIsInstance(text_ngram, list)
-
-    
-	# def test_get_sentiment_tuple_for_nonempty_text(self):
-	# 	# model = BlobTextModel('eng')
-	# 	model = TextBlobSpacy().get_model()
-	# 	btc = BlobTextClient(model)
-	# 	sentiment = btc.get_sentiment("I am happy about today")
-	# 	self.assertIsInstance(sentiment, dict)
-
-	# def test_get_polarity_for_empty_text(self):
-	# 	pass
-
-	# def test_get_polarity_for_nonempty_text(self):
-	# 	pass
-
-	# def test_get_subjectivity_for_empty_text(self):
-	# 	pass
-
-	# def test_get_subjectivity_for_nonempty_text(self):
-	# 	pass
-    
-	# def test_get_ngram_for_empty_text(self):
-	# 	pass
-
-	# def test_get_ngram_for_nonempty_text(self):
-	# 	pass
 	
-
-# from blobtext_client import BlobTextClient
-# from test_blobtextmodel import TextBlobSpacy,TextblobTestModel
-# class TestBlobTextClient(unittest.TestCase):
-# 	# def setUp(self):
-# 	# 	spacymodel = TextBlobSpacy().get_model()
-# 	# 	textblob = TextblobTestModel(spacymodel)
-		
-	
-# 	def test_get_sentiment_tuple_for_empty_text(self):
-# 		# model = BlobTextModel('eng')
-# 		model = TextBlobSpacy().get_model()
-
-# 		btc = BlobTextClient(model)
-# 		sentiment = btc.get_sentiment("")
-# 		self.assertIsInstance(sentiment, dict)
-# 		# desired output {"polarity": .. , "subjectivity": ..,  }
-	
-# 	def test_get_sentiment_tuple_for_nonempty_text(self):
-# 		# model = BlobTextModel('eng')
-# 		model = TextBlobSpacy().get_model()
-# 		btc = BlobTextClient(model)
-# 		sentiment = btc.get_sentiment("I am happy about today")
-# 		self.assertIsInstance(sentiment, dict)
-
-# 	def test_get_polarity_for_empty_text(self):
-# 		pass
-
-# 	def test_get_polarity_for_nonempty_text(self):
-# 		pass
-
-# 	def test_get_subjectivity_for_empty_text(self):
-# 		pass
-
-# 	def test_get_subjectivity_for_nonempty_text(self):
-# 		pass
+	def test_get_polarity_float_for_nonempty_text(self):
+		modeltestdouble = TextBlobGenericModel('eng_model')
+		sentimentlist = [(['ultimate','finally'], 0.0, 1.0,None),   # example of sentiment anaylsis from textblob
+		                 (['able'], 0.5, 0.625, None),
+						 (['fearful'], -0.9, 1.0,None)]
+		modeltestdouble.return_textblob_doc(sentimentlist)
+		btc = BlobTextClient(modeltestdouble) #[-1.0, 1.0]
+		text_polarity = btc.get_polarity('...') 
+		# expected = in range[-1,1] # 0.037500000000000006
+		self.assertTrue(-1<=text_polarity<=1)
     
-# 	def test_get_ngram_for_empty_text(self):
-# 		pass
-
-# 	def test_get_ngram_for_nonempty_text(self):
-# 		pass
-	

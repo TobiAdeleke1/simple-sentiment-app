@@ -1,4 +1,4 @@
-import spacy
+# import spacy
 
 # from spacytextblob.spacytextblob import SpacyTextBlob
 
@@ -6,68 +6,33 @@ class BlobTextClient:
 	def __init__(self, model):
 		self.model = model
 	
-	def set_textblobdoc(self, sentence):
-		self.doc = self.model(sentence)._.blob
-	
-	def get_textblob(self, sentence, blob_model):
-		# self.doc = self.model(sentence)._.blob
-		return blob_model(sentence)
-	    
 	def get_sentiment(self, sentence):
-		# expect a list of tuples
+		# get a list of tuples, want to conver
 		# e.g [(['word1','word2'],1.0, 1.0, None)] 
 		# or [(['',''],1.0, 1.0, None), (['',''],-0.5, 1.0, None)] 
-		return []
+		blob_doc = self.model(sentence).sentimentlist
+		sentiment = [
+			        {"words":sentence_word.keywordlist,
+	                "wordpolarity":sentence_word.keywordpolarity, 
+					"wordsubjectivity":sentence_word.keywordsubjectivity}
+					 for sentence_word in blob_doc]
+		return {"sentimentwords":sentiment}
 	
 	def get_polarity(self, sentence):
-		# expect a float between 0 and 1
-		return float(0.0)
+		# expect a float between -1 and 1
+		blob_doc = self.model(sentence)
+		return blob_doc.overallpolarity
 	
 	def get_subjectivity(self, sentence):
-		# expect a float between 0 and 1
-		return float(0.0)
-	
-	def get_ngram(self, sentence):
-	    # expect like [WordList(['I', 'am', 'very']),
-		# WordList(['but', 'sad', 'about']), WordList(['sad', 'about', 'yesterday'])]
-	    return []
+		doc = self.model(sentence) # expect a float between 0 and 1
+		return doc.overallsubjectivity
 
-class TextBlobSpacy:
-    def __init__(self, sentence):
-        self.sentence = sentence
+ 
 
-    def __call__(self):
-	    return self.sentence
-	 
-
-
-# import spacy
-# from spacytextblob.spacytextblob import SpacyTextBlob
-
-# class BlobTextClient:
-# 	def __init__(self, model):
-# 		self.model = model
-	
-# 	def set_textblobdoc(self, sentence):
-# 		self.doc = self.model(sentence)._.blob
-	
-# 	def get_sentiment(self):
-# 		return self.doc.sentiment
-	
-# 	def get_polarity(self):
-# 		return self.doc.polarity
-	
-# 	def get_subjectivity(self):
-# 		return self.doc.subjectivity
-	
-# 	def get_ngram(self):
-# 	    return self.doc.ngram
 # class TextBlobSpacy:
-#     def __init__(self):
-#         self.model = spacy.load("en_core_web_sm")
-#         self.model.add_pipe('spacytextblob')
-    
-#     def get_model(self):
-#         return self.model
+#     def __init__(self, sentence):
+#         self.sentence = sentence
 
-        
+#     def __call__(self):
+# 	    return self.sentence
+	 
